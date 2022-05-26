@@ -1,10 +1,10 @@
-from django.shortcuts import render, get_object_or_404
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.cache import cache_page
-from .models import Post, Group, User, Follow
-from .forms import PostForm, CommentForm
 from core.utils import page
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.cache import cache_page
+
+from .forms import CommentForm, PostForm
+from .models import Follow, Group, Post, User
 
 
 @cache_page(20, key_prefix='index_page')

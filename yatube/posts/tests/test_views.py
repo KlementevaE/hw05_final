@@ -1,14 +1,15 @@
 import shutil
 import tempfile
-from django.contrib.auth import get_user_model
+
+from django import forms
 from django.conf import settings
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django import forms
 
-from ..models import Group, Post, Follow
+from ..models import Follow, Group, Post
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 User = get_user_model()
@@ -70,7 +71,10 @@ class PostViewTests(TestCase):
             reverse('posts:post_create'): 'posts/create_post.html',
             reverse('posts:post_edit', kwargs={'post_id': self.post.pk}):
             'posts/create_post.html',
+            '/unexicting_page/': 'core/404.html',
+            '/500/': 'core/500.html',
         }
+
         for reverse_name, template in pages_names_templates.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client_author.get(reverse_name)
@@ -153,13 +157,13 @@ class PaginatorViewsTest(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
-        list_posts = []
-        for i in range(1, 14):
-            list_posts.append(Post.objects.create(author=cls.user,
-                                                  text=f'Тестовый пост{i}',
-                                                  group=cls.group))
-
-        cls.post = list_posts
+        posts = [
+            Post(author=cls.user,
+                 text=f'Тестовый пост{i}',
+                 group=cls.group)
+            for i in range(1, 14)
+        ]
+        Post.objects.bulk_create(posts)
 
         cls.group = Group.objects.create(
             title='Вторая тестовая группа',

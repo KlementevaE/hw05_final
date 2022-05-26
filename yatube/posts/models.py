@@ -1,6 +1,5 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.db import models
 
 User = get_user_model()
 NUM_SYMBOLS = 15
@@ -75,7 +74,9 @@ class Follow(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'author'],
-                                    name='unique_follow')
+                                    name='unique_follow'),
+            models.CheckConstraint(check=~models.Q(author=models.F('user')),
+                                   name='author_not_user'),
         ]
 
     def __str__(self):
